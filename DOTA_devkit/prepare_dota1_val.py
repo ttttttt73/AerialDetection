@@ -7,8 +7,9 @@ from multiprocessing import Pool
 from DOTA2COCO import DOTA2COCOTest, DOTA2COCOTrain
 import argparse
 
-wordname_roof = ['facility', 'rooftop', 'flatroof', 'solarpanel_flat', 'solarpanel_slope', 'parkinglot', 'heliport']
-
+wordname_15 = ['plane', 'baseball-diamond', 'bridge', 'ground-track-field', 'small-vehicle', 'large-vehicle', 'ship', 'tennis-court',
+                'basketball-court', 'storage-tank',  'soccer-ball-field', 'roundabout', 'harbor', 'swimming-pool', 'helicopter']
+                
 def parse_args():
     parser = argparse.ArgumentParser(description='prepare dota1')
     parser.add_argument('--srcpath', default='/home/dingjian/project/dota')
@@ -66,6 +67,8 @@ def prepare(srcpath, dstpath):
         os.mkdir(os.path.join(dstpath, 'test1024'))
     if not os.path.exists(os.path.join(dstpath, 'trainval1024')):
         os.mkdir(os.path.join(dstpath, 'trainval1024'))
+    if not os.path.exists(os.path.join(dstpath, 'val1024')):
+        os.mkdir(os.path.join(dstpath, 'val1024'))
 
     split_train = ImgSplit_multi_process.splitbase(os.path.join(srcpath, 'train'),
                        os.path.join(dstpath, 'trainval1024'),
@@ -91,10 +94,10 @@ def prepare(srcpath, dstpath):
                       )
     split_test.splitdata(1)
 
-    DOTA2COCOTrain(os.path.join(dstpath, 'trainval1024'), os.path.join(dstpath, 'trainval1024', 'DOTA_trainval1024.json'), wordname_roof, difficult='-1')
-    DOTA2COCOTrain(os.path.join(dstpath, 'val1024'), os.path.join(dstpath, 'val1024', 'DOTA_val1024.json'), wordname_roof, difficult='-1')
-    # DOTA2COCOTest(os.path.join(dstpath, 'val1024'), os.path.join(dstpath, 'val1024', 'DOTA_val1024.json'), wordname_roof)
-    DOTA2COCOTest(os.path.join(dstpath, 'test1024'), os.path.join(dstpath, 'test1024', 'DOTA_test1024.json'), wordname_roof)
+    DOTA2COCOTrain(os.path.join(dstpath, 'trainval1024'), os.path.join(dstpath, 'trainval1024', 'DOTA_trainval1024.json'), wordname_15, difficult='-1')
+    DOTA2COCOTrain(os.path.join(dstpath, 'val1024'), os.path.join(dstpath, 'val1024', 'DOTA_val1024.json'), wordname_15, difficult='-1')
+    # DOTA2COCOTest(os.path.join(dstpath, 'val1024'), os.path.join(dstpath, 'val1024', 'DOTA_val1024.json'), wordname_15)
+    DOTA2COCOTest(os.path.join(dstpath, 'test1024'), os.path.join(dstpath, 'test1024', 'DOTA_test1024.json'), wordname_15)
 
 if __name__ == '__main__':
     args = parse_args()

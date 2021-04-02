@@ -15,6 +15,8 @@ def coco_eval(result_file, result_types, coco, max_dets=(100, 300, 1000)):
     if mmcv.is_str(coco):
         coco = COCO(coco)
     assert isinstance(coco, COCO)
+    print("coco.dataset['categories']: ", coco.dataset['categories'])
+    # print("coco.loadCats(1): ", coco.loadCats(1)[0]['name'])
 
     if result_types == ['proposal_fast']:
         ar = fast_eval_recall(result_file, coco, np.array(max_dets))
@@ -24,6 +26,7 @@ def coco_eval(result_file, result_types, coco, max_dets=(100, 300, 1000)):
 
     assert result_file.endswith('.json')
     coco_dets = coco.loadRes(result_file)
+    print("coco_dets: ", coco_dets)
 
     img_ids = coco.getImgIds()
     for res_type in result_types:
@@ -33,10 +36,12 @@ def coco_eval(result_file, result_types, coco, max_dets=(100, 300, 1000)):
         if res_type == 'proposal':
             cocoEval.params.useCats = 0
             cocoEval.params.maxDets = list(max_dets)
+        print("cocoEval.evalImgs: ", cocoEval.evalImgs)
         cocoEval.evaluate()
+        print("cocoEval.evalImgs[0]: ", cocoEval.evalImgs[0])
         cocoEval.accumulate()
         cocoEval.summarize()
-
+    return cocoEval.stats, cocoEval.stats_category
 
 def fast_eval_recall(results,
                      coco,

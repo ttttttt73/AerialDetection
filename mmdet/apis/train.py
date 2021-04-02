@@ -181,6 +181,7 @@ def _non_dist_train(model, dataset, cfg, validate=False):
             cfg.gpus,
             dist=False)
     ]
+    print('len(data_loaders): ', len(data_loaders))
     # put model on gpus
     model = MMDataParallel(model, device_ids=range(cfg.gpus)).cuda()
     # build runner
@@ -189,6 +190,7 @@ def _non_dist_train(model, dataset, cfg, validate=False):
                     cfg.log_level)
     runner.register_training_hooks(cfg.lr_config, cfg.optimizer_config,
                                    cfg.checkpoint_config, cfg.log_config)
+
 
     if cfg.resume_from:
         runner.resume(cfg.resume_from)

@@ -2,7 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.checkpoint import checkpoint
-from mmcv.cnn.weight_init import caffe2_xavier_init
+try:
+    from mmcv.cnn.weight_init import caffe2_xavier_init
+except ModuleNotFoundError:
+    from mmcv.cnn.utils.weight_init import caffe2_xavier_init
 
 from ..utils import ConvModule
 from ..registry import NECKS

@@ -203,7 +203,14 @@ def HBBDet2Comp4(dataset, results):
         result = results[idx]
         for label in range(len(result)):
             bboxes = result[label]
-
+            '''print(len(dataset))
+            print(result)
+            print(len(result))
+            print("label: ", label)
+            print("filename: ", filename)
+            print("result: ", result)
+            print("bboxes: ", bboxes)
+            print("dataset.CLASSES: ", dataset.CLASSES, "\n")'''
             # try:
             cls_name = dataset.CLASSES[label]
             # except:

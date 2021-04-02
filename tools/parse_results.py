@@ -31,6 +31,8 @@ def parse_args():
     parser.add_argument('--config', default='configs/DOTA/faster_rcnn_r101_fpn_1x_dota2_v3_RoITrans_v5.py')
     parser.add_argument('--type', default=r'HBB',
                         help='parse type of detector')
+    parser.add_argument('--result', help='resuilt file path')
+    parser.add_argument('--out', help='output file path')
     args = parser.parse_args()
 
     return args
@@ -59,7 +61,7 @@ def OBB2HBB(srcpath, dstpath):
 def parse_results(config_file, resultfile, dstpath, type):
     cfg = Config.fromfile(config_file)
 
-    data_test = cfg.data['test']
+    data_test = cfg.data['val']
     dataset = get_dataset(data_test)
     outputs = mmcv.load(resultfile)
     if type == 'OBB':
@@ -123,8 +125,11 @@ if __name__ == '__main__':
     args = parse_args()
     config_file = args.config
     config_name = os.path.splitext(os.path.basename(config_file))[0]
-    pkl_file = os.path.join('work_dirs', config_name, 'results.pkl')
-    output_path = os.path.join('work_dirs', config_name)
+    # pkl_file = os.path.join('work_dirs', config_name, 'results.pkl')
+    # output_path = os.path.join('work_dirs', config_name)
+    pkl_file = args.result
+    output_path = args.out
+
     type = args.type
     parse_results(config_file, pkl_file, output_path, type)
 

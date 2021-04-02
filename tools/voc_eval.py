@@ -13,9 +13,14 @@ def voc_eval(result_file, dataset, iou_thr=0.5):
     gt_labels = []
     gt_ignore = []
     for i in range(len(dataset)):
+        print("dataset: ", dataset)
+        print(i)
+        print(dataset.img_infos[0])
         ann = dataset.get_ann_info(i)
+        print('\n', 'ann: ', ann, '\n')
         bboxes = ann['bboxes']
         labels = ann['labels']
+        print("bboxes, labels: ", bboxes, labels)
         if 'bboxes_ignore' in ann:
             ignore = np.concatenate([
                 np.zeros(bboxes.shape[0], dtype=np.bool),
@@ -23,7 +28,8 @@ def voc_eval(result_file, dataset, iou_thr=0.5):
             ])
             gt_ignore.append(ignore)
             bboxes = np.vstack([bboxes, ann['bboxes_ignore']])
-            labels = np.concatenate([labels, ann['labels_ignore']])
+            if 'labels_ignore' in ann:
+                labels = np.concatenate([labels, ann['labels_ignore']])
         gt_bboxes.append(bboxes)
         gt_labels.append(labels)
     if not gt_ignore:
@@ -54,7 +60,7 @@ def main():
         help='IoU threshold for evaluation')
     args = parser.parse_args()
     cfg = mmcv.Config.fromfile(args.config)
-    test_dataset = mmcv.runner.obj_from_dict(cfg.data.test, datasets)
+    test_dataset = mmcv.runner.obj_from_dict(cfg.data.val, datasets)
     voc_eval(args.result, test_dataset, args.iou_thr)
 
 

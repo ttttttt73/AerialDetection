@@ -109,8 +109,15 @@ def get_dataset(data_cfg):
         data_info['img_prefix'] = img_prefixes[i]
         dset = obj_from_dict(data_info, datasets)
         dsets.append(dset)
+        print(i, 'len(data_info[ann_file]): ', len(data_info['ann_file']))
+
+    print('ann_files: ', ann_files)
+    print('len(desets): ', len(dsets))
+    print('dets: ', dsets)
+
     if len(dsets) > 1:
         dset = ConcatDataset(dsets)
     else:
         dset = dsets[0]
+
     return dset

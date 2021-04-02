@@ -21,6 +21,7 @@ def parse_args():
 
 def single_copy(src_dst_tuple):
     shutil.copyfile(*src_dst_tuple)
+    
 def filecopy(srcpath, dstpath, num_process=32):
     pool = Pool(num_process)
     filelist = util.GetFileFromThisRootDir(srcpath)
