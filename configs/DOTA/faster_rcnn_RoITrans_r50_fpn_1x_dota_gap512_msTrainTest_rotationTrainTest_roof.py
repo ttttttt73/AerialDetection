@@ -37,7 +37,7 @@ model = dict(
         in_channels=256,
         fc_out_channels=1024,
         roi_feat_size=7,
-        num_classes=8,
+        num_classes=9,
         target_means=[0., 0., 0., 0., 0.],
         target_stds=[0.1, 0.1, 0.2, 0.2, 0.1],
         reg_class_agnostic=True,
@@ -56,7 +56,7 @@ model = dict(
         in_channels=256,
         fc_out_channels=1024,
         roi_feat_size=7,
-        num_classes=8,
+        num_classes=9,
         target_means=[0., 0., 0., 0., 0.],
         target_stds=[0.05, 0.05, 0.1, 0.1, 0.05],
         reg_class_agnostic=False,
@@ -140,9 +140,9 @@ test_cfg = dict(
     # e.g., nms=dict(type='soft_nms', iou_thr=0.5, min_score=0.05)
 )
 # dataset settings
-dataset_type = 'ROOFDataset'
-# data_root = 'data/val_with_label/'
-data_root = '../AerialDetection/data/val_with_label/'
+dataset_type = 'ROOFDataset_r_h'
+# data_root = 'data/dota1_1024/'
+data_root = 'data/r_h_1024_val/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 data = dict(
@@ -150,24 +150,27 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'trainval1024/DOTA_trainval1024.json',
-        img_prefix=data_root + 'trainval1024/images/',
+        ann_file=[data_root + 'trainval1024/DOTA_trainval1024.json',
+                  data_root + 'trainval1024_ms/DOTA_trainval1024_ms.json'],
+        img_prefix=[data_root + 'trainval1024/images/',
+                    data_root + 'trainval1024_ms/images/'],
         img_scale=(1024, 1024),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
         flip_ratio=0.5,
         with_mask=True,
         with_crowd=True,
-        with_label=True),
+        with_label=True,
+        rotate_aug=dict(border_value=0, small_filter=6)
+    ),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'val1024/DOTA_val1024.json',
-        img_prefix=data_root + 'val1024/images',
+        ann_file=data_root + 'val1024_ms/DOTA_val1024_ms.json',
+        img_prefix=data_root + 'val1024_ms/images',
         img_scale=(1024, 1024),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
         flip_ratio=0,
-        with_mask=True,
         # with_crowd=True,
         # with_label=True
         with_label=False,
@@ -205,10 +208,10 @@ log_config = dict(
     ])
 # yapf:enable
 # runtime settings
-total_epochs = 100
+total_epochs = 12
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/val_with_label_classes_8_cp1_val1_roitrans'
+work_dir = './work_dirs/roof_r_h_faster_rcnn_RoITrans_r50_fpn_1x_dota_gap512_msTrainTest_rotationTrainTest'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

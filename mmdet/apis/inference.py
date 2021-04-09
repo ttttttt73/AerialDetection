@@ -10,7 +10,7 @@ from mmdet.core import get_classes
 from mmdet.datasets import to_tensor
 from mmdet.datasets.transforms import ImageTransform
 from mmdet.models import build_detector
-
+from extend import extend as extend_img
 
 def init_detector(config, checkpoint=None, device='cuda:0'):
     """Initialize a detector from config file.
@@ -142,7 +142,36 @@ def show_result(img, result, class_names, score_thr=0.3, out_file=None):
         show=out_file is None,
         out_file=out_file)
 
-def draw_poly_detections(img, detections, class_names, scale, threshold=0.2):
+def check_overlapping_parts(overlapping, text_rect, width, height):
+    changed_text_rect = text_rect
+    if overlapping is None:
+        return changed_text_rect
+
+    for start_point in overlapping:
+        new_x = changed_text_rect[0]
+        new_y = changed_text_rect[1]
+
+        x = start_point[0]
+        y = start_point[1]
+
+        #절대 안겹칠 조건 : x가 x-width 보다 작거나 // x+width 보다 클 때
+        # (continue)     y가 y-height 보다 작거나 // y+height 보다 클 때
+        if (new_x < x-width) or (new_x > x+width):
+            continue
+
+        elif (new_y < y-height) or (new_y > y+height):
+            continue
+
+        else:
+            # print("overlapped x, y")
+            changed_text_rect = [new_x, new_y + height]
+            changed_text_rect = check_overlapping_parts(overlapping, changed_text_rect, width, height)
+
+    # print("result cnaged box : (" ,changed_text_rect[0], "," ,changed_text_rect[1], ")")
+    return changed_text_rect
+
+
+def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2, extend=False):
     """
 
     :param img:
@@ -157,27 +186,83 @@ def draw_poly_detections(img, detections, class_names, scale, threshold=0.2):
     import cv2
     import random
     assert isinstance(class_names, (tuple, list))
-    img = mmcv.imread(img)
+    img = mmcv.imread(imgpath)
+    img_h, img_w = img.shape[:2]
+    if extend:
+        img = extend_img(imgpath)
+    
     color_white = (255, 255, 255)
 
+    drawed_counts = 0
+    overlapping = []
     for j, name in enumerate(class_names):
         color = (random.randint(0, 256), random.randint(0, 256), random.randint(0, 256))
+        threshold_dict = {
+                        'flatroof': 0.05, 'solarpanel_flat': 0.05,
+                        'solarpanel_slope': 0.05, 'parkinglot': 0.5,
+                        'facility': 0.1, 'rooftop': 0.05,
+                        'heliport': 0.05
+                    }
         try:
             dets = detections[j]
+            # print('len(dets): ', len(dets), j, name)
         except:
             pdb.set_trace()
         for det in dets:
             bbox = det[:8] * scale
             score = det[-1]
-            if score < threshold:
+            # if score < threshold:
+                # print('bbox: ', bbox, 'score: ', score, '--------> Score is lower than threshold')
+            if score < threshold_dict[name]:
+                print('bbox: ', bbox, 'score: ', score, '--------> Score is lower than threshold', name, threshold_dict[name])
                 continue
+            # print('bbox: ', bbox, 'score: ', score)
+            # print('det: ', det)
             bbox = list(map(int, bbox))
 
-            cv2.circle(img, (bbox[0], bbox[1]), 3, (0, 0, 255), -1)
-            for i in range(3):
-                cv2.line(img, (bbox[i * 2], bbox[i * 2 + 1]), (bbox[(i+1) * 2], bbox[(i+1) * 2 + 1]), color=color, thickness=2)
-            cv2.line(img, (bbox[6], bbox[7]), (bbox[0], bbox[1]), color=color, thickness=2)
+            x_c = int((bbox[0] + bbox[4])/2)
+            y_c = int((bbox[1] + bbox[5])/2)
+            x_c_width = 150
+            y_c_height = 15
+            text_rect = [x_c, y_c]
+
+            # 레이블을 찍을 위치에 이미 다른 레이블이 찍혀있다면 (위치가 중복된 경우) 위로 찍게 하기
+            # 이미 찍은 점들과 위치를 비교해서 안겹치는 위치로 조정된 text_구역에 찍을 위치를 받아옴
+            changed_text_rect = check_overlapping_parts(overlapping, text_rect, x_c_width, y_c_height)
+            x_c = changed_text_rect[0]
+            y_c = changed_text_rect[1]
+            overlapping.append(changed_text_rect)
+
+            # cv2.circle(img, (bbox[0], bbox[1]), 3, (0, 0, 255), -1)
+                        
+            '''cv2.line(img, (bbox[0], bbox[1]), (bbox[0], bbox[3]), color=color, thickness=2)
+            cv2.line(img, (bbox[0], bbox[1]), (bbox[2], bbox[1]), color=color, thickness=2)
+            cv2.line(img, (bbox[0], bbox[3]), (bbox[2], bbox[3]), color=color, thickness=2)
+            cv2.line(img, (bbox[2], bbox[3]), (bbox[2], bbox[1]), color=color, thickness=2)
+            # cv2.line(img, (bbox[6], bbox[7]), (bbox[0], bbox[1]), color=color, thickness=2)
             cv2.putText(img, '%s %.3f' % (class_names[j], score), (bbox[0], bbox[1] + 10),
-                        color=color_white, fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5)
+                        color=color_white, fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5)'''
+            for i in range(3):
+                cv2.line(img, (bbox[i * 2], bbox[i * 2 + 1]), (bbox[(i+1) * 2], bbox[(i+1) * 2 + 1]), color=(0, 255, 0), thickness=2)
+                # print(i * 2, i * 2 + 1, (i+1) * 2, (i+1) * 2 + 1)
+            '''for i in range(0, 8, 2):    
+                cv2.putText(img, str(i+1), (bbox[i], bbox[i+1]), color=(0,255,250), fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5)'''
+            cv2.line(img, (bbox[6], bbox[7]), (bbox[0], bbox[1]), color=(0, 255, 0), thickness=2)
+            cv2.rectangle(img, pt1=(x_c, y_c), 
+                                pt2=(x_c + x_c_width, y_c + y_c_height), 
+                                color=(0, 255, 0), 
+                                thickness=-1)
+            # cv2.putText(img, '%s %.3f' % (class_names[j], score), (bbox[0], bbox[1] + 10),
+            #             color=(255, 0, 0), fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5)
+            cv2.putText(img, '%s %.3f' % (class_names[j], score), org=(x_c, y_c+10),
+                         color=(255, 0, 0), fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=0.5, thickness=2)
+            drawed_counts += 1
+
+    print("drawed counts: ", drawed_counts)
+    cv2.putText(img, text=str(drawed_counts), org=((img.shape[1]) // 2, (img.shape[0]) // 2), fontFace=3, fontScale=1, color=(255, 0, 0), thickness=2)
+
+    if extend:
+        img = img[int(img_h/2):int(img_h/2)+int(img_h), int(img_w/2):int(img_w/2)+int(img_w)]
+
     return img
 

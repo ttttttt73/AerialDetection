@@ -209,7 +209,7 @@ def main():
         shuffle=False)
 
     # build the model and load checkpoint
-    epoch_num = 12
+    epoch_num = 1
     writer = before_run(args.checkpoint)
     while True:
         f = os.listdir(args.checkpoint)
@@ -264,7 +264,7 @@ def main():
                                 stats, stats_category = coco_eval(result_file, eval_types, dataset.coco)
                                 log(stats, stats_category, writer, epoch_num)
             epoch_num += 1
-            if epoch_num >= 101:
+            if epoch_num >= 13:
                 break
 
     after_run(writer) 
