@@ -142,7 +142,11 @@ test_cfg = dict(
 # dataset settings
 dataset_type = 'ROOFDataset_r_h'
 # data_root = 'data/dota1_1024/'
-data_root = 'data/r_h_1024_val/'
+# Train 시
+# data_root = 'data/r_h_1024_val/'
+# Inference 시
+data_root = '../AerialDetection/data/r_h_1024_val/'
+
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 data = dict(
@@ -177,8 +181,10 @@ data = dict(
         test_mode=True),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'test1024/DOTA_test1024.json',
-        img_prefix=data_root + 'test1024/images',
+        # ann_file=data_root + 'test1024/DOTA_test1024.json',
+        # img_prefix=data_root + 'test1024/images',
+        ann_file=data_root + 'val1024_ms/DOTA_val1024_ms.json',
+        img_prefix=data_root + 'val1024_ms/images',
         # ann_file=data_root + 'test1024_ms/DOTA_test1024_ms.json',
         # img_prefix=data_root + 'test1024_ms/images',
         img_scale=(1024, 1024),

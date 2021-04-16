@@ -76,7 +76,7 @@ class DetectorModel():
         self.classnames = self.dataset.CLASSES
         self.model = init_detector(config_file, checkpoint_file, device='cuda:0')
         self.extend = True
-        self.extend_div_scale = 4
+        self.extend_div_scale = 1/2
 
 
     def inference_single(self, imagname, slide_size, chip_size):
@@ -183,8 +183,17 @@ class DetectorModel():
                         'flatroof': 0.05, 'solarpanel_flat': 0.05,
                         'solarpanel_slope': 0.05, 'parkinglot': 0.5,
                         'facility': 0.1, 'rooftop': 0.05,
-                        'heliport': 0.05
+                        'heliport_r': 0.05, 'heliport_h': 0.05
+                        # 'heliport': 0.05
                     }
+
+            '''threshold_dict = {
+                'flatroof': 0.1, 'solarpanel_flat': 0.05,
+                'solarpanel_slope': 0.05, 'parkinglot': 0.5,
+                'facility': 0.3, 'rooftop': 0.05,
+                'heliport_r': 0.05, 'heliport_h': 0.05
+                #'heliport': 0.05
+            }'''
             
             num_of_detected = 0
             num_confidence_over = 0
@@ -212,9 +221,9 @@ class DetectorModel():
                     
                     if self.extend:
                         for i in range(0, len(bbox), 2):
-                            bbox[i] = bbox[i] - int((self.extend_div_scale - 1) * img_width / self.extend_div_scale)
+                            bbox[i] = bbox[i] - int(self.extend_div_scale * img_width)
                         for i in range(1, len(bbox), 2):
-                            bbox[i] = bbox[i] - int((self.extend_div_scale - 1) * img_height / self.extend_div_scale)
+                            bbox[i] = bbox[i] - int(self.extend_div_scale * img_height)
                     
                     detected_bbox = bbox
                     center_x = (bbox[0] + bbox[4])/2
@@ -287,7 +296,7 @@ class DetectorModel():
                                                                       labels=det_category_r_,
                                                                       scores=det_scores_r_)
                 cv2.imwrite(result_image_path + '/' + image_name, result_image)'''
-                img = draw_poly_detections(img_path, detections, self.classnames, scale=1, threshold=0.3, extend=self.extend)
+                img = draw_poly_detections(img_path, detections, self.classnames, scale=1, threshold=0.3, extend=self.extend, extend_div_scale=self.extend_div_scale)
                 cv2.imwrite(result_image_path + '/' + image_name, img)
 
             #####################################################################################

@@ -171,7 +171,7 @@ def check_overlapping_parts(overlapping, text_rect, width, height):
     return changed_text_rect
 
 
-def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2, extend=False):
+def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2, extend=False, extend_div_scale=0):
     """
 
     :param img:
@@ -189,7 +189,7 @@ def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2,
     img = mmcv.imread(imgpath)
     img_h, img_w = img.shape[:2]
     if extend:
-        img = extend_img(imgpath)
+        img = extend_img(imgpath, extend_div_scale)
     
     color_white = (255, 255, 255)
 
@@ -201,8 +201,17 @@ def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2,
                         'flatroof': 0.05, 'solarpanel_flat': 0.05,
                         'solarpanel_slope': 0.05, 'parkinglot': 0.5,
                         'facility': 0.1, 'rooftop': 0.05,
-                        'heliport': 0.05
+                        'heliport_r': 0.05, 'heliport_h': 0.05
+                        # 'heliport': 0.05
                     }
+
+        '''threshold_dict = {
+            'flatroof': 0.1, 'solarpanel_flat': 0.05,
+            'solarpanel_slope': 0.05, 'parkinglot': 0.5,
+            'facility': 0.3, 'rooftop': 0.05,
+            'heliport_r': 0.05, 'heliport_h': 0.05
+            #'heliport': 0.05
+        }'''
         try:
             dets = detections[j]
             # print('len(dets): ', len(dets), j, name)
@@ -261,8 +270,10 @@ def draw_poly_detections(imgpath, detections, class_names, scale, threshold=0.2,
     print("drawed counts: ", drawed_counts)
     cv2.putText(img, text=str(drawed_counts), org=((img.shape[1]) // 2, (img.shape[0]) // 2), fontFace=3, fontScale=1, color=(255, 0, 0), thickness=2)
 
+
+
     if extend:
-        img = img[int(img_h/2):int(img_h/2)+int(img_h), int(img_w/2):int(img_w/2)+int(img_w)]
+        img = img[int(extend_div_scale * img_h):int(extend_div_scale * img_h)+int(img_h), int(extend_div_scale * img_w):int(extend_div_scale * img_w)+int(img_w)]
 
     return img
 

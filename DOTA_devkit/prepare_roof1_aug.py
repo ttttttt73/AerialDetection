@@ -7,7 +7,11 @@ from multiprocessing import Pool
 from DOTA2COCO import DOTA2COCOTest, DOTA2COCOTrain
 import argparse
 
-wordname_roof = ['facility', 'flatroof', 'rooftop', 'parkinglot', 'solarpanel_flat', 'solarpanel_slope', 'heliport_r', 'heliport_h']
+# 중요! 순서 맞춰야 함
+
+# 실수 wordname_roof = ['facility', 'flatroof', 'rooftop', 'parkinglot', 'solarpanel_flat', 'solarpanel_slope', 'heliport_r', 'heliport_h']
+wordname_roof = ['facility', 'rooftop', 'flatroof', 'solarpanel_flat', 'solarpanel_slope', 'parkinglot', 'heliport_r', 'heliport_h']
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='prepare dota1')

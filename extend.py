@@ -64,8 +64,14 @@ def extend(path, extend_div_scale):
                         [surround_imgs[3], surround_imgs[4], surround_imgs[5]], 
                         [surround_imgs[6], surround_imgs[7], surround_imgs[8]]])
     
-    ii= (extend_div_scale -1) * img_h / extend_div_scale
-    res = res[int(img_h/2):int(img_h/2)+int(img_h*2), int(img_w/2):int(img_w/2)+int(img_w*2)]
+    scaled_img_h = extend_div_scale * img_h
+    scaled_img_w = extend_div_scale * img_w
+
+    scaeld_start_h = (1 - extend_div_scale) * img_h
+    scaeld_start_w = (1 - extend_div_scale) * img_w
+
+    res = res[int(scaeld_start_h):int(scaeld_start_h+(scaled_img_h*2)+img_h), int(scaeld_start_w):int(scaeld_start_w)+int((scaled_img_w*2)+img_w)]
+    # res = res[int(img_h/2):int(img_h/2)+int(img_h*2), int(img_w/2):int(img_w/2)+int(img_w*2)]
 
     # print("res.shape: ", res.shape)
     '''cv2.circle(img, (540, 1), radius=1, color=(0, 0, 255),
@@ -85,4 +91,5 @@ def extend(path, extend_div_scale):
 
 if __name__ == "__main__":
     path = "./area2_10/MO-11111111110/0_0_35.69491915900303_139.69317728042603_35.69520833_139.6928125_35.69354167_139.6971875.png"
-    extend(path)
+    extend_div_scale = 1/4
+    extend(path, extend_div_scale)
